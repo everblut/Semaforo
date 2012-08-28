@@ -5,20 +5,51 @@ public class Semaforo{
       1->Ambar
       2->Rojo     
     */
-    private int actualState,maxTime,minTime,greenTime,yellowTime,redTime;
+    //Tiempos en milisegundos
+    private int actualState;
+    private long maxTime,minTime;
+    private Carril carril;
     private String state[] = {"Verde","Ambar","Rojo"};
 
-    public Semaforo(){
+    public Semaforo(int maxTime,int minTime,Carril carril){
+	//Carril correspondiente
+	this.carril = carril;
 	//Inicializar el semaforo en rojo
 	actualState = 2;
+	//Set de los tiempos totales del semaforo,los 3000 son los 3 segundos del ambar
+	this.maxTime = maxTime - 3000;
+	this.minTime = minTime - 3000;
+	
     }
 
-    public void changeState(int state){
-	actualState = state;
+    public void changeState(){
+	//Cada que se mande llamar el metodo se cambia de estado
+	//Si esta en rojo,cambiamos a verde
+	if(actualState == 2)
+	    actualState = 0;
+	//Si esta en otro estado,cambiamos al siguiente
+	else
+	    actualState++;
     }
     
+    //getters
     public String getState(){
 	return state[actualState];
     }
 
+    public long getMinTime(){
+	return minTime;
+    }
+
+    public long getMaxTime(){
+	return maxTime;
+    }
+
+    public int getCarros(){
+	return carril.getNumVehiculos();
+    }
+
+    public Carril getCarril(){
+	return carril;
+    }
 }

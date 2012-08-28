@@ -1,5 +1,5 @@
 public class Carril{
-    
+   
     private int numVehiculos;
 
     public Carril(int vehiculos){

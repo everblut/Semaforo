@@ -1,0 +1,43 @@
+public class Semaforo extends Thread{
+
+    /*Estados del semaforo:
+      0->Verde
+      1->Ambar
+      2->Rojo     
+    */
+    //Tiempos en milisegundos
+    private int actualState,maxTime,minTime,greenTime,yellowTime,redTime;
+    private Carril carril;
+    private String state[] = {"Verde","Ambar","Rojo"};
+
+    public Semaforo(int maxTime,int minTime,Carril carril){
+	//Carril correspondiente
+	this.carril = carril;
+	//Inicializar el semaforo en rojo
+	actualState = 2;
+	//Set de los tiempos totales del semaforo
+	this.maxTime = maxTime;
+	this.minTime = minTime;
+	
+    }
+
+    public void changeState(int state){
+	actualState = state;
+    }
+    
+    public String getState(){
+	return state[actualState];
+    }
+
+    //Metodo run del thread
+    public void run(){
+	try{
+	    if(carril.getNumVehiculos() > 0){
+		changeState(0);
+		System.out.println(this.getState());
+	    }
+	}catch(InterruptedException e){
+	}
+    }
+
+}
