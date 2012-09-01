@@ -1,65 +1,169 @@
 public class HiloSemaforo extends Thread{
 
-    //Cuando se llega a 0 carros ya no cambia a ambar D:
+    //Poner prints para ver que funcione
+    //Quitar los tiempos de quitar carros,eso debo mandarlo al otro thread
+    //Probar que funcione :v
 
-    private Semaforo semaforosCrucero;
+    private Semaforo[] semaforosCrucero = new Semaforo[4];
     private boolean estadoInicial = true;
-    
-    public void setHilo(Semaforo SA){
-	semaforosCrucero = SA;
+    private int semaforo;
+    private long startTimeEstado,startTimeCarro,finishTimeEstado,finishTimeCarro,diferenciaEstado,diferenciaCarro;
+    private Pop popThread = new Pop();
+
+    public void setHilo(Semaforo semaforoA,Semaforo semaforoB,Semaforo semaforoC,Semaforo semaforoD){
+	semaforosCrucero[0] = semaforoA;
+	semaforosCrucero[1] = semaforoB;
+	semaforosCrucero[2] = semaforoC;
+	semaforosCrucero[3] = semaforoD;
+	popThread.setPop(semaforosCrucero[0].getCarril(),semaforosCrucero[1].getCarril(),semaforosCrucero[2].getCarril(),semaforosCrucero[3].getCarril());
+	popThread.start();
     }
     
     public void run(){
 	try{
-	    long startTimeEstado = System.currentTimeMillis();
-	    long startTimeCarro = startTimeEstado;
-	    System.out.println("Hay "+semaforosCrucero.getCarros()+" carros");
+	    //Empezamos en el carril con prioridad
+	    semaforo = 0;
 	    while(true){
-		if(estadoInicial){
-		    semaforosCrucero.changeState();
-		    System.out.println(semaforosCrucero.getState());
-		    estadoInicial = false;
-		}
-		long finishTimeEstado = System.currentTimeMillis();
-		long finishTimeCarro = finishTimeEstado;
-		long diferenciaEstado = finishTimeEstado - startTimeEstado;
-		long diferenciaCarro = finishTimeCarro - startTimeCarro;
-		//Cada 3 segundos pasa un carro
-		if(diferenciaCarro == 3000 && semaforosCrucero.getCarros() > 0){
-		    semaforosCrucero.getCarril().setNumVehiculos(semaforosCrucero.getCarros() - 1);
-		    System.out.println("Quite un carro y ahora hay "+semaforosCrucero.getCarros()+" carros");
-		    startTimeCarro = System.currentTimeMillis();
-		} 
-		//Si ya paso el tiempo minimo y ya no hay carros
-		if( semaforosCrucero.getMinTime() == diferenciaEstado && semaforosCrucero.getCarros() == 0){
-		    semaforosCrucero.changeState();
-		    System.out.println(semaforosCrucero.getState());
-		    //3 segundos del ambar
-		    sleep(3000);
-		    //Cambia a rojo
-		    semaforosCrucero.changeState();
-		    System.out.println(semaforosCrucero.getState());
+		//Si es el de prioridad,dar verde
+		if(semaforosCrucero[semaforo].getCarril().getPrioridad()){
+		    //cambiar a verde
+		    semaforosCrucero[semaforo].changeState();
+		    //Start popping cars
+		    popThread.setCrucero(semaforo);
+		    popThread.setQuitarVehiculos(true);
+		    //debugging
+		    System.out.println("Semaforo: " + semaforo +" esta en: "+ semaforosCrucero[semaforo].getState()+" con "+semaforosCrucero[semaforo].getCarril().getNumVehiculos());
+		    //Tomar los tiempos iniciales para el cambio de estado y para el paso del vehiculo(3000 -> 3 segundos)
 		    startTimeEstado = System.currentTimeMillis();
 		    startTimeCarro = startTimeEstado;
-		    estadoInicial = true;
-		    //Aqui debe ir algun sleep o algo asi para hacer la pause mientras entran los demas semaforos
+		    //ciclo del semaforo
+		    while(true){
+			//checar si ya paso el tiempo minimo y ya no hay carros
+			finishTimeEstado = System.currentTimeMillis();
+ 			finishTimeCarro = finishTimeEstado;
+			//Diferencias de tiempo
+			diferenciaEstado = finishTimeEstado - startTimeEstado;
+			diferenciaCarro = finishTimeCarro - startTimeCarro;
+			if(diferenciaEstado >= semaforosCrucero[semaforo].getMinTime() && semaforosCrucero[semaforo].getCarril().getNumVehiculos() == 0){
+			    //cambiar a ambar
+			    semaforosCrucero[semaforo].changeState();
+			    //Que ya no pasen carros :D
+			    popThread.setQuitarVehiculos(false);
+			    //debugging
+			    System.out.println("Semaforo: " + semaforo +" esta en: "+ semaforosCrucero[semaforo].getState());
+			    //poner print para ver que cambie
+			    //3 segundos antes del rojo
+			    sleep(3000);
+			    //cambiar a rojo
+			    semaforosCrucero[semaforo].changeState();
+			    //debugging
+			    System.out.println("Semaforo: " + semaforo +" esta en: "+ semaforosCrucero[semaforo].getState());
+			    //cambiar al siguiente crucero
+			    semaforo++;
+			    popThread.setCrucero(semaforo);
+			    break;
+			}//end if
+			//Si ya se llego al tiempo maximo o ya no hay carros
+			if(diferenciaEstado >= semaforosCrucero[semaforo].getMaxTime() || semaforosCrucero[semaforo].getCarril().getNumVehiculos() == 0){
+			    //Cambiar a ambar
+			    semaforosCrucero[semaforo].changeState();
+			    //Detener vehiculos
+			    popThread.setQuitarVehiculos(false);
+			    //debugging
+			    System.out.println("Semaforo: " + semaforo +" esta en: "+ semaforosCrucero[semaforo].getState());
+			    //3 segundos de ambar
+			    sleep(3000);
+			    //cambiar a rojo
+			    semaforosCrucero[semaforo].changeState();
+			    //debugging
+			    System.out.println("Semaforo: " + semaforo +" esta en: "+ semaforosCrucero[semaforo].getState());
+			    //cambiar al siguiente crucero
+			    semaforo++;
+			    popThread.setCrucero(semaforo);
+			    break;
+			}
+		    }//end while true
 		}
-		//Si ya se llego al tiempo maximo y aun hay carros cambiar a ambar
-		if( semaforosCrucero.getMaxTime() == diferenciaEstado && semaforosCrucero.getCarros() > 0){
-		     semaforosCrucero.changeState();
-		    System.out.println(semaforosCrucero.getState());
-		    //3 segundos del ambar
-		    sleep(3000);
-		    //Cambia a rojo
-		    semaforosCrucero.changeState();
-		    System.out.println(semaforosCrucero.getState());
-		    startTimeEstado = System.currentTimeMillis();
-		    startTimeCarro = startTimeEstado;
-		    estadoInicial = true;
-		}
-	    }
-	}catch(InterruptedException e){
-	    System.out.println("Exception:"+e.getMessage());
+		//Semaforos que no son los de prioridad(B,C,D)
+		else{
+		    while(true){
+			//mientras checas los carriles no prioritarios
+			while(semaforo < 4){
+			    //Checar si tienen vehiculos[Si no hay vehiculos,pasa al siguiente carril]
+			    if(semaforosCrucero[semaforo].getCarril().getNumVehiculos() == 0){
+				semaforo++;
+			    }//end if
+			    //Si hay carros,salgo del while < 4 para empezar el ciclo del semaforo
+			    else{
+				break;
+			    }
+			}//end while
+			//Suponiendo que sale del ciclo y semaforo fue igual a 4,es decir,ningun carril tenia carro,regreso a mi carril con prioridad
+			if(semaforo == 4){
+			    break;
+			}//end if
+			//Empieza el ciclo del semaforo
+			//cambiamos a verde
+			semaforosCrucero[semaforo].changeState();
+			//pasar carros :D
+			popThread.setCrucero(semaforo);
+			popThread.setQuitarVehiculos(true);
+			//debugging
+			System.out.println("Semaforo: " + semaforo +" esta en: "+ semaforosCrucero[semaforo].getState()+" con "+semaforosCrucero[semaforo].getCarril().getNumVehiculos());
+			//Tomamos los tiempos de inicio.
+			startTimeEstado = System.currentTimeMillis();
+			while(true){	
+			    finishTimeEstado = System.currentTimeMillis();
+			    diferenciaEstado = finishTimeEstado - startTimeEstado;
+			    //Si ya paso el tiempo minimo y ya no hay carros
+			    if(diferenciaEstado >= semaforosCrucero[semaforo].getMinTime() && semaforosCrucero[semaforo].getCarril().getNumVehiculos() == 0){
+				//cambiar a ambar
+				semaforosCrucero[semaforo].changeState();
+				//no pasar carros :D
+				popThread.setQuitarVehiculos(false);
+				//debugging
+				System.out.println("Semaforo: " + semaforo +" esta en: "+ semaforosCrucero[semaforo].getState());
+				//3 segundos de ambar
+				sleep(3000);
+				//cambiar a rojo
+				semaforosCrucero[semaforo].changeState();
+				//debugging
+				System.out.println("Semaforo: " + semaforo +" esta en: "+ semaforosCrucero[semaforo].getState());
+				//ir al siguiente crucero
+				semaforo++;
+				popThread.setCrucero(semaforo);
+				break;
+			    }//end if
+			    //If de que si ya se llego al tiempo maximo o que si ya no hay carros
+			    if(diferenciaEstado >= semaforosCrucero[semaforo].getMaxTime() || semaforosCrucero[semaforo].getCarril().getNumVehiculos() == 0){
+				//cambiar a ambar
+				semaforosCrucero[semaforo].changeState();
+				//no pasar carros :D
+				popThread.setQuitarVehiculos(false);
+				//debugging
+				System.out.println("Semaforo: " + semaforo +" esta en: "+ semaforosCrucero[semaforo].getState());
+				//3 segundo de ambar
+				sleep(3000);
+				//ir a rojo
+				semaforosCrucero[semaforo].changeState();
+				//debugging
+				System.out.println("Semaforo: " + semaforo +" esta en: "+ semaforosCrucero[semaforo].getState());
+				//ir al siguiente crucero
+				semaforo++;
+				popThread.setCrucero(semaforo);
+				break;
+			    }
+			}//end 2nd while true
+			//El semaforo fue el ultimo,regresar al semaforo con prioridad
+			if(semaforo >= 4){
+			    semaforo = 0;
+			    break;
+			}
+		    }//end 1st while true
+		}//end else   
+	    }//end global loop
+	}catch(Exception e){
+	    System.out.println("Exception"+e.getMessage());
 	}
-    }
+    }	
 }

@@ -7,7 +7,7 @@ public class Semaforo{
     */
     //Tiempos en milisegundos
     private int actualState;
-    private long maxTime,minTime;
+    private long maxTime,minTime,variableTime;
     private Carril carril;
     private String state[] = {"Verde","Ambar","Rojo"};
 
@@ -19,7 +19,7 @@ public class Semaforo{
 	//Set de los tiempos totales del semaforo,los 3000 son los 3 segundos del ambar
 	this.maxTime = maxTime - 3000;
 	this.minTime = minTime - 3000;
-	
+	variableTime = minTime;
     }
 
     public void changeState(){
@@ -31,6 +31,13 @@ public class Semaforo{
 	else
 	    actualState++;
     }
+
+    //setters
+
+    public void setVariableTime(long variableTime){
+	this.variableTime = variableTime;
+    }
+
     
     //getters
     public String getState(){
