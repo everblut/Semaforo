@@ -9,10 +9,10 @@ public class Semadap{
     	SemaforoGUI gui = new SemaforoGUI();
 
 		//Crear los carriles
-		Carril carrilA = new Carril(35,true,0,gui);
-		Carril carrilB = new Carril(25,false,1,gui);
-		Carril carrilC = new Carril(15,false,2,gui);
-		Carril carrilD = new Carril(20,false,3,gui);
+		Carril carrilA = new Carril(0,true,0,gui);
+		Carril carrilB = new Carril(0,false,1,gui);
+		Carril carrilC = new Carril(0,false,2,gui);
+		Carril carrilD = new Carril(0,false,3,gui);
 	
 		//Push,hilo que agrega carros a los carriles
 		Push push = new Push();

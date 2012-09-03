@@ -48,6 +48,7 @@ public class HiloSemaforo extends Thread{
 			//Diferencias de tiempo
 			diferenciaEstado = finishTimeEstado - startTimeEstado;
 			diferenciaCarro = finishTimeCarro - startTimeCarro;
+			//Ya paso el tiemo minimo y ya no hay carros
 			if(diferenciaEstado >= semaforosCrucero[semaforo].getMinTime() && semaforosCrucero[semaforo].getCarril().getNumVehiculos() == 0){
 			    //cambiar a ambar en logica y GUI
 			    semaforosCrucero[semaforo].changeState();
@@ -69,8 +70,29 @@ public class HiloSemaforo extends Thread{
 			    popThread.setCrucero(semaforo);
 			    break;
 			}//end if
-			//Si ya se llego al tiempo maximo o ya no hay carros
-			if(diferenciaEstado >= semaforosCrucero[semaforo].getMaxTime() || semaforosCrucero[semaforo].getCarril().getNumVehiculos() == 0){
+			//Si ya paso el tiempo minimo,todavia no pasa el tiempo maximo pero ya no hay carros
+			if(diferenciaEstado >= semaforosCrucero[semaforo].getMinTime() && diferenciaEstado <= semaforosCrucero[semaforo].getMaxTime() && semaforosCrucero[semaforo].getCarril().getNumVehiculos() == 0){
+			    //Cambiar a ambar
+			    semaforosCrucero[semaforo].changeState();
+			    gui.setColorSemaforo(semaforo,semaforosCrucero[semaforo].getActualState());
+			    //Detener vehiculos
+			    popThread.setQuitarVehiculos(false);
+			    //debugging
+			    System.out.println("Semaforo: " + semaforo +" esta en: "+ semaforosCrucero[semaforo].getState());
+			    //3 segundos de ambar
+			    sleep(3000);
+			    //cambiar a rojo
+			    semaforosCrucero[semaforo].changeState();
+			    gui.setColorSemaforo(semaforo,semaforosCrucero[semaforo].getActualState());
+			    //debugging
+			    System.out.println("Semaforo: " + semaforo +" esta en: "+ semaforosCrucero[semaforo].getState());
+			    //cambiar al siguiente crucero
+			    semaforo++;
+			    popThread.setCrucero(semaforo);
+			    break;
+			}//Lo acabo de agregar
+			//Si ya se llego al tiempo maximo
+			if(diferenciaEstado >= semaforosCrucero[semaforo].getMaxTime()/* || semaforosCrucero[semaforo].getCarril().getNumVehiculos() == 0*/){
 			    //Cambiar a ambar
 			    semaforosCrucero[semaforo].changeState();
 			    gui.setColorSemaforo(semaforo,semaforosCrucero[semaforo].getActualState());
