@@ -9,13 +9,16 @@ public class HiloSemaforo extends Thread{
     private int semaforo;
     private long startTimeEstado,startTimeCarro,finishTimeEstado,finishTimeCarro,diferenciaEstado,diferenciaCarro;
     private Pop popThread = new Pop();
+    //Vinculo con la GUI
+    private SemaforoGUI gui;
 
-    public void setHilo(Semaforo semaforoA,Semaforo semaforoB,Semaforo semaforoC,Semaforo semaforoD){
+    public void setHilo(Semaforo semaforoA,Semaforo semaforoB,Semaforo semaforoC,Semaforo semaforoD,SemaforoGUI gui){
+	this.gui = gui;
 	semaforosCrucero[0] = semaforoA;
 	semaforosCrucero[1] = semaforoB;
 	semaforosCrucero[2] = semaforoC;
 	semaforosCrucero[3] = semaforoD;
-	popThread.setPop(semaforosCrucero[0].getCarril(),semaforosCrucero[1].getCarril(),semaforosCrucero[2].getCarril(),semaforosCrucero[3].getCarril());
+	popThread.setPop(semaforosCrucero[0].getCarril(),semaforosCrucero[1].getCarril(),semaforosCrucero[2].getCarril(),semaforosCrucero[3].getCarril(),this.gui);
 	popThread.start();
     }
     
@@ -26,8 +29,9 @@ public class HiloSemaforo extends Thread{
 	    while(true){
 		//Si es el de prioridad,dar verde
 		if(semaforosCrucero[semaforo].getCarril().getPrioridad()){
-		    //cambiar a verde
+		    //cambiar a verde en logica y GUI
 		    semaforosCrucero[semaforo].changeState();
+		    gui.setColorSemaforo(semaforo,semaforosCrucero[semaforo].getActualState());
 		    //Start popping cars
 		    popThread.setCrucero(semaforo);
 		    popThread.setQuitarVehiculos(true);
@@ -45,8 +49,9 @@ public class HiloSemaforo extends Thread{
 			diferenciaEstado = finishTimeEstado - startTimeEstado;
 			diferenciaCarro = finishTimeCarro - startTimeCarro;
 			if(diferenciaEstado >= semaforosCrucero[semaforo].getMinTime() && semaforosCrucero[semaforo].getCarril().getNumVehiculos() == 0){
-			    //cambiar a ambar
+			    //cambiar a ambar en logica y GUI
 			    semaforosCrucero[semaforo].changeState();
+			    gui.setColorSemaforo(semaforo,semaforosCrucero[semaforo].getActualState());
 			    //Que ya no pasen carros :D
 			    popThread.setQuitarVehiculos(false);
 			    //debugging
@@ -54,8 +59,9 @@ public class HiloSemaforo extends Thread{
 			    //poner print para ver que cambie
 			    //3 segundos antes del rojo
 			    sleep(3000);
-			    //cambiar a rojo
+			    //cambiar a rojo en logica y GUI
 			    semaforosCrucero[semaforo].changeState();
+			    gui.setColorSemaforo(semaforo,semaforosCrucero[semaforo].getActualState());
 			    //debugging
 			    System.out.println("Semaforo: " + semaforo +" esta en: "+ semaforosCrucero[semaforo].getState());
 			    //cambiar al siguiente crucero
@@ -67,6 +73,7 @@ public class HiloSemaforo extends Thread{
 			if(diferenciaEstado >= semaforosCrucero[semaforo].getMaxTime() || semaforosCrucero[semaforo].getCarril().getNumVehiculos() == 0){
 			    //Cambiar a ambar
 			    semaforosCrucero[semaforo].changeState();
+			    gui.setColorSemaforo(semaforo,semaforosCrucero[semaforo].getActualState());
 			    //Detener vehiculos
 			    popThread.setQuitarVehiculos(false);
 			    //debugging
@@ -75,6 +82,7 @@ public class HiloSemaforo extends Thread{
 			    sleep(3000);
 			    //cambiar a rojo
 			    semaforosCrucero[semaforo].changeState();
+			    gui.setColorSemaforo(semaforo,semaforosCrucero[semaforo].getActualState());
 			    //debugging
 			    System.out.println("Semaforo: " + semaforo +" esta en: "+ semaforosCrucero[semaforo].getState());
 			    //cambiar al siguiente crucero
@@ -105,6 +113,7 @@ public class HiloSemaforo extends Thread{
 			//Empieza el ciclo del semaforo
 			//cambiamos a verde
 			semaforosCrucero[semaforo].changeState();
+			gui.setColorSemaforo(semaforo,semaforosCrucero[semaforo].getActualState());
 			//pasar carros :D
 			popThread.setCrucero(semaforo);
 			popThread.setQuitarVehiculos(true);
@@ -119,6 +128,7 @@ public class HiloSemaforo extends Thread{
 			    if(diferenciaEstado >= semaforosCrucero[semaforo].getMinTime() && semaforosCrucero[semaforo].getCarril().getNumVehiculos() == 0){
 				//cambiar a ambar
 				semaforosCrucero[semaforo].changeState();
+				gui.setColorSemaforo(semaforo,semaforosCrucero[semaforo].getActualState());
 				//no pasar carros :D
 				popThread.setQuitarVehiculos(false);
 				//debugging
@@ -127,6 +137,7 @@ public class HiloSemaforo extends Thread{
 				sleep(3000);
 				//cambiar a rojo
 				semaforosCrucero[semaforo].changeState();
+				gui.setColorSemaforo(semaforo,semaforosCrucero[semaforo].getActualState());
 				//debugging
 				System.out.println("Semaforo: " + semaforo +" esta en: "+ semaforosCrucero[semaforo].getState());
 				//ir al siguiente crucero
@@ -138,6 +149,7 @@ public class HiloSemaforo extends Thread{
 			    if(diferenciaEstado >= semaforosCrucero[semaforo].getMaxTime() || semaforosCrucero[semaforo].getCarril().getNumVehiculos() == 0){
 				//cambiar a ambar
 				semaforosCrucero[semaforo].changeState();
+				gui.setColorSemaforo(semaforo,semaforosCrucero[semaforo].getActualState());
 				//no pasar carros :D
 				popThread.setQuitarVehiculos(false);
 				//debugging
@@ -146,6 +158,7 @@ public class HiloSemaforo extends Thread{
 				sleep(3000);
 				//ir a rojo
 				semaforosCrucero[semaforo].changeState();
+				gui.setColorSemaforo(semaforo,semaforosCrucero[semaforo].getActualState());
 				//debugging
 				System.out.println("Semaforo: " + semaforo +" esta en: "+ semaforosCrucero[semaforo].getState());
 				//ir al siguiente crucero

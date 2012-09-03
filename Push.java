@@ -10,17 +10,20 @@ public class Push extends Thread{
     private int elegirCarril;
     //random object
     private Random random = new Random();
+    //Vinculo con la GUI
+    private SemaforoGUI gui;
 
     public void setPush(Carril carrilA){
 	carriles[0] = carrilA;
     }
 
     //Setter de la clase donde se tienen los 4 carriles
-    public void setPush(Carril carrilA,Carril carrilB,Carril carrilC,Carril carrilD){
+    public void setPush(Carril carrilA,Carril carrilB,Carril carrilC,Carril carrilD,SemaforoGUI gui){
 	carriles[0] = carrilA;
 	carriles[1] = carrilB;
 	carriles[2] = carrilC;
 	carriles[3] = carrilD;
+	this.gui = gui;
  }
 
     public void run(){
@@ -31,10 +34,12 @@ public class Push extends Thread{
 		//Si es el que carril con mas afluencia,de o a 10 carros
 		if(carriles[elegirCarril].getPrioridad()){
 		    carriles[elegirCarril].setNumVehiculos(carriles[elegirCarril].getNumVehiculos() + random.nextInt(10000) % 11);
+		    gui.setText(elegirCarril,carriles[elegirCarril].getNumVehiculos());
 		}
 		//si no,de 0 a 5 carros
 		else{
 		    carriles[elegirCarril].setNumVehiculos(carriles[elegirCarril].getNumVehiculos() + random.nextInt(10000) % 6);
+		    gui.setText(elegirCarril,carriles[elegirCarril].getNumVehiculos());
 		}
 		//Cada 5 segundos llegan vehiculos a algun carril
 		sleep(5000);

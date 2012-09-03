@@ -3,11 +3,15 @@ public class Carril{
     private boolean prioridad,quitarCarro = false;
     private int numVehiculos;
     private int outCar,inCar,restCar;
+    //Vinculo con la GUI
+    private SemaforoGUI gui;
 
 
-    public Carril(int vehiculos,boolean prioridad){
+    public Carril(int vehiculos,boolean prioridad,int numCarril,SemaforoGUI gui){
 	numVehiculos = vehiculos;
 	this.prioridad = prioridad;
+    this.gui = gui;
+    gui.setText(numCarril,numVehiculos);
     }
     
     //Metodo para darle el valor de los numeros de vehiculos

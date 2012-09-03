@@ -44,6 +44,10 @@ public class Semaforo{
 	return state[actualState];
     }
 
+    public int getActualState(){
+        return actualState;
+    }
+
     public long getMinTime(){
 	return minTime;
     }
